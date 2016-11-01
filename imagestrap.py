@@ -64,7 +64,7 @@ def parse_size(maybesuffix):
     return mult * int(maybesuffix)
 
 def chroot(img):
-    with mount(args.dotimg, mkdtemp()) as mp:
+    with mount(args.dotimg) as mp:
         with \
             mount("proc", mp + "/proc", extras="-t proc".split()), \
             mount("sysfs", mp + "/sys", extras="-t sysfs".split()), \
