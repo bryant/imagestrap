@@ -63,6 +63,18 @@ def parse_size(maybesuffix):
         maybesuffix = maybesuffix[:-1]
     return mult * int(maybesuffix)
 
+def chroot(img):
+    with mount(args.dotimg, mkdtemp()) as mp:
+        with \
+            mount("proc", mp + "/proc", extras="-t proc".split()), \
+            mount("sysfs", mp + "/sys", extras="-t sysfs".split()), \
+            mount("devtmpfs", mp + "/dev", extras="-t devtmpfs".split()), \
+            mount("devpts", mp + "/dev/pts", extras="-t devpts".split()):
+
+            # should block till shell exits
+            subprocess.Popen(["chroot " + mp], shell=True).wait()
+
+
 opts = ArgumentParser(description=("It puts the root into the filesystem. " +
                                    "Or else hose."))
 opts.add_argument("dotimg",
@@ -80,20 +92,7 @@ definc = "sudo aptitude pump ifupdown less vim-tiny openssh-server".split() + \
 if __name__ == "__main__":
     args = opts.parse_args()
     if args.chroot:
-        with mount(args.dotimg, mkdtemp()) as mp:
-            mounts = [
-                mount("proc", mp + "/proc", extras="-t proc".split()),
-                mount("sysfs", mp + "/sys", extras="-t sysfs".split()),
-                mount("devtmpfs", mp + "/dev", extras="-t devtmpfs".split()),
-                mount("devpts", mp + "/dev/pts", extras="-t devpts".split()),
-            ]
-            with \
-                mount("proc", mp + "/proc", extras="-t proc".split()), \
-                mount("sysfs", mp + "/sys", extras="-t sysfs".split()), \
-                mount("devtmpfs", mp + "/dev", extras="-t devtmpfs".split()), \
-                mount("devpts", mp + "/dev/pts", extras="-t devpts".split()):
-                # should block till shell exist
-                subprocess.Popen(["chroot " + mp], shell=True).wait()
+        chroot(args.dotimg)
     else:
         try:
             stat(args.dotimg)
