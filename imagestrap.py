@@ -26,10 +26,12 @@ def mount(src, mountpoint=None, extras=None):
     m = mountpoint or mkdtemp()
     args = ["mount"] + (extras or []) + [src, m]
     shell_through(*args)
-    yield m
-    shell_through("umount", m)
-    if mountpoint is None:
-        rmdir(m)
+    try:
+        yield m
+    finally:
+        shell_through("umount", m)
+        if mountpoint is None:
+            rmdir(m)
 
 def mkfs(img, mkfs_="mkfs.ext4"):
     return shell_through(mkfs_, img)
