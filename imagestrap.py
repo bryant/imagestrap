@@ -51,6 +51,7 @@ def create_root_img(img, size_in_bytes, release, includes=None):
     make_chunk(img, size_in_bytes)
     mkfs(img)
     with mount(img) as mountpoint:
+        logger.info("Including packages: %s" % includes)
         debootstrap(mountpoint, release, includes=includes)
 
 def parse_size(maybesuffix):
