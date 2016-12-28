@@ -76,6 +76,9 @@ def chroot(img):
             # should block till shell exits
             subprocess.Popen(["chroot " + mp], shell=True).wait()
 
+definc = "sudo aptitude pump ifupdown less vim-tiny openssh-server".split() + \
+         "iputils-ping iproute2 linux-image-amd64 linux-tools".split() + \
+         "binutils-dev sysvinit-core".split()
 
 opts = ArgumentParser(description=("It puts the root into the filesystem. " +
                                    "Or else hose."))
@@ -86,10 +89,8 @@ opts.add_argument("-s", "--size", default="2G",
 opts.add_argument("-f", "--force", action="store_true", help="Force overwrite.")
 opts.add_argument("-c", "--chroot", action="store_true",
                   help="Chroot into img (might require root).")
-
-definc = "sudo aptitude pump ifupdown less vim-tiny openssh-server".split() + \
-         "iputils-ping iproute2 linux-image-amd64 linux-tools".split() + \
-         "binutils-dev sysvinit-core".split()
+opts.add_argument("--inc", default=None,
+                  help="Optional list of packages to include.")
 
 if __name__ == "__main__":
     args = opts.parse_args()
@@ -104,5 +105,6 @@ if __name__ == "__main__":
             if not args.force:
                 print "File or dir exists:", args.dotimg
                 exit(-1)
+        incs = definc if args.inc is None else args.inc.split()
         create_root_img(args.dotimg, parse_size(args.size), "testing",
-                        includes=definc)
+                        includes=incs)
